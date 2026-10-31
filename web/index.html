@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emerald Vet Line</title>
+<meta name="description" content="A phone line for smallholder livestock farmers that acts on a sick-animal call, proves its reasoning, and gets a vet's signature first.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%230d6a4e' d='M9 3h14l7 9-14 17L2 12z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+<div class="frame" id="frame">
+  <canvas class="land" id="land" aria-hidden="true"></canvas>
+  <div class="scrim"></div>
+  <canvas class="fx" id="fx" role="img" aria-label="Aerial map of a fictional dairy cluster. Households are points of light, sick animals pulse, and vets are marked."></canvas>
+
+  <nav class="notch" aria-label="Where this case is">
+    <div class="step" data-step="call"><i>1</i>Call</div>
+    <div class="step" data-step="proof"><i>2</i>Proof</div>
+    <div class="step" data-step="vet"><i>3</i>Vet signs</div>
+    <div class="step" data-step="act"><i>4</i>Action</div>
+    <div class="step" data-step="ring"><i>5</i>Community</div>
+  </nav>
+
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="gem" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9f26c"/><stop offset="1" stop-color="#1fb98a"/></linearGradient></defs><path fill="url(#gem)" d="M9 3h14l7 9-14 17L2 12z"/><path fill="#fff" fill-opacity=".35" d="M9 3l-7 9h9l5-9zM16 3l5 9h9l-7-9z"/></svg>
+    emerald
+  </div>
+
+  <div class="status">
+    <span class="chip" id="verifyChip"><span class="dot"></span><span id="verifyText">Ledger verified</span></span>
+    <button class="chip switch" id="signal" role="switch" aria-checked="true" aria-label="Signal"><span id="signalText">Signal on</span><span class="track"></span></button>
+  </div>
+
+  <section class="hero" aria-live="polite">
+    <h1 id="headline"></h1>
+    <p id="subline"></p>
+    <div class="cta" id="cta">
+      <button class="btn primary" id="heroCall">Call the line <span class="go" aria-hidden="true">↗</span></button>
+      <button class="btn" id="storyBtn">Play three nearby calls <span class="go" aria-hidden="true">▸</span></button>
+    </div>
+  </section>
+
+  <div class="night" id="nightBanner" hidden>No signal. Still working, on this laptop.</div>
+
+  <div id="callout" class="glass" hidden></div>
+
+  <section class="call glass" aria-label="The phone line">
+    <div class="call-head">
+      <canvas class="orb" id="orb" aria-hidden="true"></canvas>
+      <div>
+        <h2 id="callTitle">The vet line</h2>
+        <div class="who"><select id="caller" aria-label="Who is calling"></select></div>
+      </div>
+      <button class="round" id="callBtn" aria-label="Start the call">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg>
+      </button>
+    </div>
+    <div class="lines" id="lines"></div>
+    <div class="scenarios" id="scenarios">
+      <button class="pill" data-s="lsd">Skin lumps, fever</button>
+      <button class="pill" data-s="anthrax">Sudden death, bleeding</button>
+      <button class="pill" data-s="rabies">Bitten, aggressive</button>
+      <button class="pill" data-s="mastitis">Swollen udder</button>
+    </div>
+  </section>
+
+  <aside class="side">
+    <section class="panel glass" aria-label="Evidence, actions and record">
+      <div class="tabs" role="tablist">
+        <button class="tab on" data-tab="proof" role="tab">Proof<span class="n" id="nProof"></span></button>
+        <button class="tab" data-tab="actions" role="tab">Actions<span class="n" id="nActions"></span></button>
+        <button class="tab" data-tab="ledger" role="tab">Ledger<span class="n" id="nLedger"></span></button>
+      </div>
+      <div class="pane" id="pane"></div>
+    </section>
+    <section class="vet" id="vet" aria-label="Vet sign-off" hidden></section>
+  </aside>
+
+  <div class="dock">
+    <div class="simnote" id="simNote">Demo data. Calls and payments are simulated.</div>
+    <div class="numbers glass" aria-label="So far">
+      <div class="num"><b id="nCases">0</b><span>cases</span></div>
+      <div class="num"><b id="nSigned">0</b><span>vet signatures</span></div>
+      <div class="num"><b id="nRing">0</b><span>homes warned</span></div>
+      <div class="num"><b id="nPaid">₹0</b><span>paid to vets</span></div>
+    </div>
+  </div>
+</div>
+<script src="/web/map.js"></script>
+<script src="/web/app.js"></script>
+</body>
+</html>

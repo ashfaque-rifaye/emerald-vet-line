@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Emerald Scenes</title>
+<link rel="stylesheet" href="/web/fonts/fonts.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #07261c; color: #fff; font: 28px/1.35 "Figtree", "Noto Sans Devanagari", sans-serif; }
+  .scene { display: none; position: absolute; inset: 0; padding: 86px 110px; background: radial-gradient(90% 110% at 85% 0%, #127a5b 0%, #0a4b38 42%, #07261c 100%); }
+  .scene.on { display: block; }
+  h1 { margin: 0; font: 600 128px/1 "Bricolage Grotesque", sans-serif; letter-spacing: -.045em; }
+  h2 { margin: 0 0 38px; font: 600 72px/1.02 "Bricolage Grotesque", sans-serif; letter-spacing: -.035em; }
+  .capsule { display: inline-block; width: 1.5em; height: .76em; border-radius: 99px; vertical-align: -.08em; position: relative; background: linear-gradient(100deg, #0d8a63, #36d6a0 52%, #c9f26c); }
+  .capsule::after { content: ""; position: absolute; top: 12%; bottom: 12%; right: 6%; aspect-ratio: 1; border-radius: 50%; background: rgba(255, 255, 255, .88); }
+  .lede { max-width: 1120px; margin-top: 44px; font-size: 38px; line-height: 1.32; color: rgba(255, 255, 255, .86); }
+  .brand { position: absolute; left: 110px; bottom: 74px; font: 700 42px "Bricolage Grotesque"; letter-spacing: -.03em; color: #c9f26c; }
+  .note { position: absolute; left: 110px; right: 110px; bottom: 56px; font-size: 22px; color: rgba(255, 255, 255, .62); }
+
+  .arch { display: grid; grid-template-columns: 1fr 1.14fr 1fr; gap: 26px; align-items: stretch; }
+  .box { border-radius: 26px; padding: 26px 30px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .17); }
+  .box h3 { margin: 0 0 12px; font: 600 33px/1.1 "Bricolage Grotesque"; color: #c9f26c; letter-spacing: -.02em; }
+  .box ul { margin: 0; padding: 0; list-style: none; }
+  .box li { padding: 8px 0; font-size: 25px; line-height: 1.26; border-top: 1px solid rgba(255, 255, 255, .11); }
+  .box li:first-child { border-top: 0; }
+  .box b { font-weight: 600; }
+  .box small { display: block; color: rgba(255, 255, 255, .66); font-size: 20px; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .stat { border-radius: 26px; padding: 26px 30px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .17); }
+  .stat b { display: block; font: 600 88px/1 "Bricolage Grotesque"; letter-spacing: -.04em; color: #c9f26c; }
+  .stat span { display: block; margin-top: 10px; font-size: 26px; line-height: 1.24; }
+  .stat small { display: block; margin-top: 6px; font-size: 20px; color: rgba(255, 255, 255, .66); }
+  .honest { margin-top: 26px; padding: 22px 28px; border-radius: 22px; background: rgba(242, 184, 75, .15); border: 1px solid rgba(242, 184, 75, .4); font-size: 27px; line-height: 1.28; }
+</style>
+</head>
+<body>
+<section class="scene" id="title">
+  <h1>Most farm AI <span class="capsule"></span><br>gives advice.</h1>
+  <p class="lede">Emerald makes the phone call, shows its sources, and waits for the vet.</p>
+  <div class="brand">emerald</div>
+  <div class="note" style="left:auto;width:auto;right:110px;bottom:80px">Built with the Strands Agents SDK. Every person in this demo is synthetic.</div>
+</section>
+
+<section class="scene" id="arch">
+  <h2>Same agents, cloud or laptop</h2>
+  <div class="arch">
+    <div class="box"><h3>The call</h3><ul>
+      <li><b>Strands BidiAgent</b><small>Live Hindi voice</small></li>
+      <li><b>Amazon Nova Sonic</b><small>Speech to speech on Bedrock</small></li>
+      <li><b>Twilio bridge</b><small>8 kHz phone audio, ready for a number</small></li>
+      <li><b>Red flags in code</b><small>Before any model acts</small></li>
+    </ul></div>
+    <div class="box"><h3>The agents</h3><ul>
+      <li><b>Strands Graph with a cycle</b><small>Evidence, then a custom verifier node</small></li>
+      <li><b>Strands interrupts in a hook</b><small>A durable pause until a vet decides</small></li>
+      <li><b>Two model families</b><small>Nova 2 Lite reasons, Llama 3.3 checks</small></li>
+      <li><b>AgentCore Runtime</b><small>Hosts all of it, deployed on AWS</small></li>
+      <li><b>Local model through Ollama</b><small>When there is no signal</small></li>
+    </ul></div>
+    <div class="box"><h3>The tools</h3><ul>
+      <li><b>7 MCP servers</b><small>The same contract in both lanes</small></li>
+      <li><b>AgentCore Gateway + Cedar</b><small>Default deny, checked outside the model</small></li>
+      <li><b>Ed25519 signatures</b><small>Verified inside each tool</small></li>
+      <li><b>S3 Object Lock</b><small>Seals the signed record</small></li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="scene" id="results">
+  <h2>Measured, on synthetic cases</h2>
+  <div class="grid">
+    <div class="stat"><b>0 / 15</b><span>attacks completed an unsigned irreversible action</span><small>Both lanes, real models</small></div>
+    <div class="stat"><b>0</b><span>misquotes, and 0 doses or drug names told to a farmer</span><small>Final runs, both lanes</small></div>
+    <div class="stat"><b>100%</b><span>of outbreak runs filed the report and made the calls</span><small>3 of 3 in each lane</small></div>
+    <div class="stat"><b id="costStat">COST</b><span>of model cost per case in the cloud</span><small>Bedrock list price, voice not included</small></div>
+    <div class="stat"><b id="timeStat">TIME</b><span>from the third call to the vet's first request</span><small id="timeNote">Cloud lane</small></div>
+    <div class="stat"><b id="recallStat">RECALL</b><span>of signs caught from Hindi, Hinglish and English</span><small id="recallNote">Cloud lane</small></div>
+  </div>
+  <div class="honest"><b>What this doesn't show:</b> it hasn't been used with real farmers, and no veterinarian has reviewed it yet. These tests check the software keeps its promises, not clinical accuracy. Calls and payments are labelled simulations.</div>
+</section>
+
+<section class="scene" id="end">
+  <h1>Emerald <span class="capsule"></span></h1>
+  <p class="lede">Open source, Apache-2.0. Run it, and try to break it.</p>
+  <p class="lede" style="margin-top:18px;color:#c9f26c;font-size:34px">github.com/ashfaque-rifaye/emerald-vet-line</p>
+  <div class="note">Decision support only, not a veterinary or medical service. Treatment content from India's Standard Veterinary Treatment Guidelines, FAO, and the 2009 animal diseases Act. FAO does not endorse this project.</div>
+</section>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  document.getElementById(q.get("scene") || "title").classList.add("on");
+  for (const key of ["cost", "time", "recall"]) { if (q.get(key)) document.getElementById(key + "Stat").textContent = q.get(key); }
+  if (q.get("timeNote")) document.getElementById("timeNote").textContent = q.get("timeNote");
+  if (q.get("recallNote")) document.getElementById("recallNote").textContent = q.get("recallNote");
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/
+sources/raw/
+.env
+*.key
+*.pin
+HACKATHON_BRIEF.md
+.claude/
+*.log

@@ -1,0 +1,13 @@
+Emerald
+Copyright 2026 Emerald contributors
+
+This product is licensed under the Apache License, Version 2.0.
+
+sources/passages.jsonl contains short excerpts from third-party documents, which remain the work of their publishers
+and are not covered by this project's licence. See sources/README.md for what they are and where they come from.
+
+FAO material is reproduced for non-commercial use with acknowledgement of FAO as the source and copyright holder.
+FAO does not endorse this project.
+
+The console's fonts in web/fonts (Bricolage Grotesque, Figtree, JetBrains Mono, Noto Sans Devanagari) are under the SIL Open Font License.
+The console's landscape is generated in code and shows a fictional place.
