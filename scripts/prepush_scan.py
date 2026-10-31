@@ -35,6 +35,9 @@ def account_id() -> bytes | None:
 
 def main() -> int:
     files = subprocess.run(["git", "diff", "--cached", "--name-only", "--diff-filter=d", "-z"], capture_output=True, check=True).stdout.decode().split("\0")
+    # Nothing staged must not read as a clean pass, so scan everything tracked instead.
+    if not any(files):
+        files = subprocess.run(["git", "ls-files", "-z"], capture_output=True, check=True).stdout.decode().split("\0")
     account = account_id()
     problems = []
     for name in filter(None, files):

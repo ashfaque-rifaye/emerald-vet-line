@@ -9,7 +9,7 @@ Deadline: treat as **Thu Nov 5, 2026, 12:29 PM IST** (Nov 4, 11:59 PM PDT). A su
 | 1 | Complete the Strands workshop within the submission period | **You must do this.** Free sandbox, listed on Builder Center |
 | 2 | Agent built with the Strands Agents SDK, for a social good challenge, on AWS | Done. Deployed on AgentCore Runtime |
 | 3 | Project article published on Builder Center | Draft: [`ARTICLE.md`](ARTICLE.md). **You publish it** |
-| 4 | Public repo with an OSI licence | Ready to publish as https://github.com/ashfaque-rifaye/emerald-vet-line (Apache-2.0). Needs your go-ahead |
+| 4 | Public repo with an OSI licence | Done. https://github.com/ashfaque-rifaye/emerald-vet-line (Apache-2.0) |
 | 5 | Public video under 3 minutes, on YouTube, Vimeo, Facebook Video or Youku, with no unlicensed music or trademarks | Built, no music. **You upload it** |
 | 6 | Original, not previously published | Yes. Never published before this entry |
 
