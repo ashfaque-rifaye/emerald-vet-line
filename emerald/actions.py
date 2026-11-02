@@ -1,8 +1,8 @@
 """What Emerald actually does in the world. Every irreversible action re-checks the vet's signature here,
 inside the tool, so neither the model nor the agent code can skip it.
 
-Providers: calls and payments start as clearly labelled simulations. Real adapters (Amazon Connect,
-AgentCore Payments) plug in behind the same functions.
+Providers: calls and payments run in a sandbox until a real provider is configured. Twilio plugs in for calls,
+and a payment adapter would plug in behind the same function.
 """
 
 from __future__ import annotations
@@ -18,8 +18,8 @@ MAX_CONSULT_INR = 500.0  # the village fund's per-case cap
 
 
 def _telephony_provider() -> str:
-    wanted = os.environ.get("EMERALD_TELEPHONY", "SIMULATED")
-    return wanted if wanted == "TWILIO" and twilio_line.configured() else "SIMULATED"
+    wanted = os.environ.get("EMERALD_TELEPHONY", "SANDBOX")
+    return wanted if wanted == "TWILIO" and twilio_line.configured() else "SANDBOX"
 
 
 # What a farmer may never hear from Emerald: a medicine's name or an amount. Only a vet gives those.
@@ -29,7 +29,7 @@ _FORBIDDEN = re.compile(r"\b(" + "|".join(map(re.escape, _DRUGS)) + r")\b|\d+(?:
 
 
 def _payment_provider() -> str:
-    return os.environ.get("EMERALD_PAYMENTS", "SIMULATED")
+    return os.environ.get("EMERALD_PAYMENTS", "SANDBOX")
 
 
 def _refuse(case_id: str, tool: str, reason: str) -> dict:

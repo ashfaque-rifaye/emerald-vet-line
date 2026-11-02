@@ -1,10 +1,10 @@
 """Emerald on Amazon Bedrock AgentCore Runtime. The same graph, gate and MCP servers as the laptop.
 
 A session keeps its cases on the microVM's disk for its lifetime, so a pause for the vet survives
-between invocations. Telephony and payments stay labelled simulations here too.
+between invocations. Telephony and payments stay in the sandbox here too.
 
 Payloads:
-  {"action": "call", "farmer_id": "F010", "transcript": "..."}           a farmer's words, in Hindi or English
+  {"action": "call", "farmer_id": "F010", "transcript": "..."}           a farmer's words
   {"action": "call", "farmer_id": "F010", "signs": [...], "weight_kg": 320}
   {"action": "sign", "signoff_id": "SO-...", "vet_id": "V01", "pin": "...", "approve": true}
   {"action": "state"}

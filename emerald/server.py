@@ -52,11 +52,6 @@ def index() -> FileResponse:
     return FileResponse(WEB / "index.html")
 
 
-@app.get("/docs/scenes.html")
-def scenes() -> FileResponse:
-    return FileResponse(config.ROOT / "docs" / "scenes.html")
-
-
 @app.get("/api/world")
 def world() -> dict:
     return {**registry.world(), "centre": registry.CENTRE, "ring_km": surveillance.RING_RADIUS_KM, "signs": sorted(triage.SIGNS),
@@ -78,8 +73,8 @@ def state() -> dict:
         entry["payload"] = json.loads(entry["payload"])
     return {
         "lane": config.lane(), "device": config.device_id(),
-        "telephony_provider": os.environ.get("EMERALD_TELEPHONY", "SIMULATED"),
-        "payment_provider": os.environ.get("EMERALD_PAYMENTS", "SIMULATED"),
+        "telephony_provider": os.environ.get("EMERALD_TELEPHONY", "SANDBOX"),
+        "payment_provider": os.environ.get("EMERALD_PAYMENTS", "SANDBOX"),
         "cases": cases, "pending": signoff.pending(), "signoffs": _rows("SELECT * FROM signoffs ORDER BY requested_at DESC"),
         "calls": _rows("SELECT * FROM calls ORDER BY placed_at DESC, rowid DESC"),
         "payments": _rows("SELECT * FROM payments ORDER BY paid_at DESC"),
@@ -226,25 +221,12 @@ async def phone_line(ws: WebSocket, farmer_id: str) -> None:
     call = voice.PhoneCall(farmer_id, on_case=on_case, on_done=on_done)
     await call.agent.start()
 
-    line_number = 0
-
-    async def send_gloss(number: int, text: str) -> None:
-        gloss = await asyncio.to_thread(voice.english_gloss, text)
-        if gloss:
-            try:
-                await ws.send_json({"type": "gloss", "line": number, "text": gloss})
-            except (WebSocketDisconnect, RuntimeError):
-                pass  # the caller hung up before the translation arrived
-
     async def speak_out() -> None:
-        nonlocal line_number
         async for event in call.agent.receive():
             if isinstance(event, BidiAudioDeltaEvent):
                 await ws.send_json({"type": "audio", "audio": event.audio})
             elif isinstance(event, BidiTranscriptBlockEvent):
-                line_number += 1
-                await ws.send_json({"type": "transcript", "role": event.role, "text": event.transcript, "line": line_number})
-                asyncio.create_task(send_gloss(line_number, event.transcript))
+                await ws.send_json({"type": "transcript", "role": event.role, "text": event.transcript})
             elif isinstance(event, BidiBargeInEvent):
                 await ws.send_json({"type": "barge_in"})
             elif isinstance(event, BidiToolUseBlocksEvent):

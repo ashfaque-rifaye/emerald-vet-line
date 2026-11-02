@@ -8,7 +8,7 @@ For a smallholder family, a sick cow is a health problem and a money problem at 
 
 Veterinary AI already exists. There are voice advisers, photo diagnosis tools and WhatsApp services, and many of them are useful. I wanted to try something different: an agent that doesn't stop at advice.
 
-**Emerald is a phone line. A farmer describes a sick animal in Hindi, and the agent gets to work: it finds what official guidelines say, phones the nearest vet with the evidence, and proposes a treatment plan and a consult payment. Then it stops, because nothing irreversible happens until a vet signs that exact action.** If three nearby farmers report the same signs, it drafts the report the law requires, and once a vet signs, it warns every registered home around them. When the network drops, a field worker's laptop carries on with a local model.
+**Emerald is a phone line. A farmer describes a sick animal, and the agent gets to work: it finds what official guidelines say, phones the nearest vet with the evidence, and proposes a treatment plan and a consult payment. Then it stops, because nothing irreversible happens until a vet signs that exact action.** If three nearby farmers report the same signs, it drafts the report the law requires, and once a vet signs, it warns every registered home around them. When the network drops, a field worker's laptop carries on with a local model.
 
 Everyone in this project is synthetic, and it hasn't been used with real farmers. More on that below.
 
@@ -18,7 +18,7 @@ Everyone in this project is synthetic, and it hasn't been used with real farmers
 
 A call moves through five stages, and the console shows each one on a map of a fictional dairy cluster.
 
-1. **Call.** The farmer talks, with no app or reading needed. A Strands `BidiAgent` on Amazon Nova Sonic listens in Hindi and records the signs with one tool. If asked for a dose, it refuses.
+1. **Call.** The farmer talks, with no app or reading needed. A Strands `BidiAgent` on Amazon Nova Sonic listens and records the signs with one tool. If asked for a dose, it refuses.
 2. **Proof.** A Strands `Graph` checks the evidence. Every claim has to survive being compared with its source.
 3. **Vet signs.** Treatment, money, reports and warning calls all pause. The vet presses and holds to sign.
 4. **Action.** The tool itself checks the signature, then acts.
@@ -73,7 +73,7 @@ The workshop takes you from simple loops to multi-agent swarms. Emerald uses tho
 
 ### On AWS
 
-- **AgentCore Runtime** hosts the whole agent, graph and MCP servers included, and I tested a Hindi statement through to signed actions there.
+- **AgentCore Runtime** hosts the whole agent, graph and MCP servers included, and I tested a farmer's statement through to signed actions there.
 - **AgentCore Gateway** serves the stateless knowledge and dosing tools as remote MCP behind IAM.
 - **AgentCore Policy** puts Cedar in front of them, denying by default. A dose request for a 5,000 kg animal is refused before the tool runs.
 - **S3 Object Lock** seals each field kit's signed record when it gets signal back. Bedrock then reviews what the local model decided offline, and tells the vet about anything weak.
@@ -98,12 +98,12 @@ I wrote the evaluation plan before running it, with targets. Final results, on s
 | Misquotes | 0 | **0** | **0** |
 | Doses or drug names told to a farmer | 0 | **0** | **0** |
 | Outbreak runs with report and calls done | 0.95 | **1.0** | **1.0** |
-| Sign recall in Hindi, Hinglish and English | 0.80, cloud | **0.98** | 0.85 |
-| Same candidate diseases as the cloud lane | 0.80 | n/a | **0.88** |
+| Sign recall in everyday English | 0.80, cloud | **1.0** | 0.90 |
+| Same candidate diseases as the cloud lane | 0.80 | n/a | **0.96** |
 | Third call to the vet's first request (median) | Reported | 21 s | 23 s |
 | Model cost per case, excluding voice | Reported | about $0.003 | none per token |
 
-**What this doesn't show.** It hasn't been used with real farmers. No veterinarian has reviewed it. I wrote the test cases and attacks, so these numbers show that the software keeps its promises, not that its advice is clinically right. The Hindi caller is a synthetic voice, so real accents and bad phone lines are untested. Calls and payments are labelled simulations, though the phone bridge passes a test with real 8 kHz telephone audio and needs only a Twilio account.
+**What this doesn't show.** It hasn't been used with real farmers. No veterinarian has reviewed it. I wrote the test cases and attacks, so these numbers show that the software keeps its promises, not that its advice is clinically right. In the video the farmer is played, not a real farmer, so real accents and bad phone lines are untested. Calls and payments run in a sandbox, shown as Test mode in the console, though the phone bridge passes a test with real 8 kHz telephone audio and needs only a Twilio account.
 
 So I can't tell you it saves animals yet. What I can measure today is whether the safeguards hold.
 
@@ -136,6 +136,6 @@ With Bedrock access, `python -m emerald.server` opens the console. Press "Play t
 
 ## What's next
 
-The most important next step isn't code. A real veterinarian needs to review the cases and the guidance, and then it should be tested with community animal health workers. After that come a live phone number, real payment rails such as UPI, and more languages. Nova Sonic has no Tamil yet, for example.
+The most important next step isn't code. A real veterinarian needs to review the cases and the guidance, and then it should be tested with community animal health workers. After that come a live phone number, real payment rails such as UPI, and Indian languages. This version speaks English. Nova Sonic can already do Hindi, but it has no Tamil yet, for example.
 
 *Decision support only, not a veterinary or medical service. Treatment content comes from India's Standard Veterinary Treatment Guidelines for Livestock and Poultry, which describe themselves as advisory, from FAO's lumpy skin disease field manual, and from the Prevention and Control of Infectious and Contagious Diseases in Animals Act, 2009. FAO does not endorse this project.*

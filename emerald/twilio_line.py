@@ -1,7 +1,7 @@
 """A real phone number, using Twilio. Telephone audio is 8 kHz mu-law, Nova Sonic takes 8 kHz PCM.
 
 Inbound: Twilio streams the call over a WebSocket to /twilio/stream, and it reaches the same PhoneCall the
-browser uses. Outbound: vet calls and ring calls are placed through Twilio's REST API and spoken in Hindi.
+browser uses. Outbound: vet calls and ring calls are placed through Twilio's REST API and spoken in English.
 Needs TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER and a public URL (see README).
 EMERALD_DEMO_PHONE sends every outbound call to one number you own, since the registry's people are synthetic.
 """
@@ -63,7 +63,7 @@ def stream_twiml(public_url: str, farmer_id: str) -> str:
 
 
 def say_twiml(text: str) -> str:
-    return f'<Response><Say language="hi-IN" voice="Polly.Aditi">{escape(text)}</Say></Response>'
+    return f'<Response><Say language="en-IN" voice="Polly.Raveena">{escape(text)}</Say></Response>'
 
 
 def configured() -> bool:

@@ -8,11 +8,11 @@ Built with the [Strands Agents SDK](https://strandsagents.com) for the AWS Build
 
 ![Emerald's console](docs/images/vet.png)
 
-> Decision support only. Emerald is not a veterinary or medical service, and it has not been used with real farmers or reviewed in the field. Every farmer, vet, doctor and animal in this repo is synthetic. Phone calls and payments are clearly labelled simulations unless a real provider is configured.
+> Decision support only. Emerald is not a veterinary or medical service, and it has not been used with real farmers or reviewed in the field. Every farmer, vet, doctor and animal in this repo is synthetic. Phone calls and payments run in a sandbox, shown as Test mode in the console, unless a real provider is configured.
 
 ## What happens on a call
 
-1. **A farmer dials in** and describes the animal in Hindi. No app, smartphone or reading is needed. If the signs raise a red flag, code tells the farmer what to do straight away and calls a doctor when people may be exposed.
+1. **A farmer dials in** and describes the animal. No app, smartphone or reading is needed. If the signs raise a red flag, code tells the farmer what to do straight away and calls a doctor when people may be exposed.
 2. **Evidence.** One model drafts claims, each citing a numbered sentence from official sources. Code fills in the exact words and checks them, and a second model from a different family rejects claims the source doesn't support.
 3. **Action.** Emerald phones the nearest vet with the evidence and proposes a treatment plan and a consult payment.
 4. **The vet signs.** Irreversible actions pause until a vet approves that exact action, even across a restart. Change one detail, like the amount, and the signature no longer applies.
@@ -40,7 +40,7 @@ On synthetic cases, in both the cloud and offline lanes: 0 of 15 attacks complet
 
 | Piece | What it uses |
 |---|---|
-| Voice | Strands `BidiAgent` with Amazon Nova Sonic, in Hindi |
+| Voice | Strands `BidiAgent` with Amazon Nova Sonic |
 | Evidence loop | Strands `Graph` with a cycle: evidence agent, then a custom verifier node |
 | Vet pause | Strands interrupts from a `BeforeToolCallEvent` hook, with file-backed sessions |
 | Tools | 7 MCP servers, the same in both lanes: `knowledge`, `dosing`, `registry`, `surveillance`, `telephony`, `payments`, `ledger`. Knowledge and dosing are also served remotely through AgentCore Gateway |
@@ -54,7 +54,7 @@ On synthetic cases, in both the cloud and offline lanes: 0 of 15 attacks complet
 | Amazon Bedrock AgentCore Runtime | Hosts the whole agent: graph, gate and MCP servers, in a session that keeps a pause for the vet alive ([`agentcore_entry.py`](agentcore_entry.py), [`deploy_runtime.py`](scripts/deploy_runtime.py)) |
 | Amazon Bedrock AgentCore Gateway | Serves the stateless knowledge and dosing tools as remote MCP, with IAM auth ([`deploy_gateway.py`](scripts/deploy_gateway.py)) |
 | AgentCore Policy (Cedar) | Default deny at the gateway. A dose request for an implausible weight is refused before the tool runs |
-| Amazon Nova 2 Sonic | The Hindi voice line |
+| Amazon Nova 2 Sonic | The voice line |
 | Amazon Nova 2 Lite and Llama 3.3 on Bedrock | Reasoning, and the independent second opinion |
 | Amazon S3 Object Lock | Field kits seal their signed record here when they get signal back ([`sync.py`](emerald/sync.py)) |
 | AWS Lambda | Runs the gateway's tools ([`tool_lambda.py`](emerald/tool_lambda.py)) |
@@ -98,14 +98,14 @@ Cloud runs need AWS credentials with Amazon Bedrock access in `us-east-1`. Optio
 
 ### A real phone number
 
-Calls are simulated until this is set up. It needs a Twilio account, which you create yourself:
+Calls stay in the sandbox until this is set up. It needs a Twilio account, which you create yourself:
 
 1. Buy a voice number and set its webhook to `https://<public-url>/twilio/voice`. A tunnel such as `cloudflared` works for a demo.
 2. Add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`, `EMERALD_DEMO_PHONE` and `EMERALD_TELEPHONY=TWILIO` to `.env`.
 
 Everyone in the registry is synthetic, so outbound calls only ever go to `EMERALD_DEMO_PHONE`. `scripts/twilio_check.py` tests the bridge with no account.
 
-Payments stay simulated. AgentCore Payments needs a Coinbase or Privy wallet account, and only the amount cap and the vet's signature are demonstrated here.
+Payments stay in the sandbox. AgentCore Payments needs a Coinbase or Privy wallet account, and only the amount cap and the vet's signature are demonstrated here.
 
 ## Licence
 

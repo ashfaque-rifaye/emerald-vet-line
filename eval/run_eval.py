@@ -29,7 +29,7 @@ def sign_scores(pairs: list[tuple[set, set]]) -> dict:
 def run_intake(cases: list[dict]) -> dict:
     from emerald import intake, triage
 
-    rows, pairs, by_lang = [], [], {}
+    rows, pairs = [], []
     for case in cases:
         started = time.time()
         try:
@@ -39,12 +39,11 @@ def run_intake(cases: list[dict]) -> dict:
             got, error = set(), type(exc).__name__
         want = set(case["signs"])
         pairs.append((got, want))
-        by_lang.setdefault(case["lang"], []).append((got, want))
         candidates = [c["disease"] for c in triage.assess(sorted(got))["candidates"]]
         rows.append({"id": case["id"], "got": sorted(got), "want": sorted(want), "candidates": candidates, "expected": case["disease"],
                      "disease_hit": (case["disease"] in candidates) if case["disease"] else (not candidates), "error": error,
                      "seconds": round(time.time() - started, 1)})
-    return {"overall": sign_scores(pairs), "by_language": {k: sign_scores(v) for k, v in by_lang.items()},
+    return {"overall": sign_scores(pairs),
             "disease_hit_rate": round(sum(r["disease_hit"] for r in rows) / len(rows), 3), "rows": rows}
 
 

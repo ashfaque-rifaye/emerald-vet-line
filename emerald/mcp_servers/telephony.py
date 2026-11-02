@@ -1,4 +1,4 @@
-"""emerald-telephony: outbound calls. Results name the provider, so a simulated call says it is simulated."""
+"""emerald-telephony: outbound calls. Results name the provider, so a sandbox call says it is a sandbox call."""
 
 from mcp.server.mcpserver import MCPServer
 

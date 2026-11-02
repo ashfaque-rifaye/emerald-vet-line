@@ -1,6 +1,6 @@
 """Downloads the console's fonts next to the page, so it looks the same with no internet on a field kit.
 
-All four families are under the SIL Open Font License. Run: python scripts/fetch_fonts.py
+All three families are under the SIL Open Font License. Run: python scripts/fetch_fonts.py
 """
 
 from __future__ import annotations
@@ -11,10 +11,10 @@ import urllib.request
 from pathlib import Path
 
 CSS_URL = ("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800"
-           "&family=Figtree:wght@400..700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400..600&display=swap")
+           "&family=Figtree:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap")
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"
 OUT = Path(__file__).resolve().parent.parent / "web" / "fonts"
-KEEP = {"latin", "devanagari"}
+KEEP = {"latin"}
 
 
 def get(url: str) -> bytes:
@@ -29,7 +29,7 @@ def main() -> None:
     out = []
     for subset, block in blocks:
         family = re.search(r"font-family: '([^']+)'", block).group(1)
-        if subset not in KEEP or (subset == "devanagari") != (family == "Noto Sans Devanagari"):
+        if subset not in KEEP:
             continue
         url = re.search(r"url\((https://[^)]+\.woff2)\)", block).group(1)
         name = hashlib.sha256(url.encode()).hexdigest()[:16] + ".woff2"

@@ -1,25 +1,24 @@
 # Evaluation results
 
-Plan and targets: [`PREREGISTRATION.md`](PREREGISTRATION.md). Raw output: [`results-cloud.json`](results-cloud.json), [`results-offline.json`](results-offline.json). Run on 2026-10-31 (cloud) and 2026-10-31 (offline), on the final code.
+Plan and targets: [`PREREGISTRATION.md`](PREREGISTRATION.md). Raw output: [`results-cloud.json`](results-cloud.json), [`results-offline.json`](results-offline.json). Run on 2026-11-01 (cloud) and 2026-11-01 (offline), on the final code.
 
 **What this can't show:** Emerald has not been used with real farmers, and no veterinarian has reviewed these cases. We wrote the test cases and attacks ourselves. These numbers show whether the software keeps its promises, not clinical accuracy.
 
 | # | Metric | Target | Cloud (Nova 2 Lite, Llama 3.3) | Offline (qwen2.5:7b, RTX 4060 laptop) |
 |---|---|---|---|---|
-| 1 | Sign recall, all 24 statements | 0.80, cloud | **0.983** | 0.847 |
-| 1 | Sign precision | Reported | 1.0 | 0.926 |
-| 1 | Recall in Hindi / Hinglish / English | Reported | 1.0 / 0.944 / 1.0 | 0.773 / 0.833 / 0.947 |
+| 1 | Sign recall, all 24 statements | 0.80, cloud | **1.0** | 0.898 |
+| 1 | Sign precision | Reported | 0.983 | 0.946 |
 | 2 | Triage rules point to the labelled disease | 0.95 | **1.0** (partly circular: rules and labels share a source) | same code |
-| 2 | Right disease from a spoken statement, end to end | Reported | 1.0 | 0.958 |
+| 2 | Right disease from a spoken statement, end to end | Reported | 0.958 | 0.958 |
 | 4 | Misquotes, re-checked outside the pipeline | 0 | **0** | **0** |
 | 5 | Attacks that completed an unsigned irreversible action | 0 of 15 | **0** | **0** |
 | 6 | Doses or drug names told to a farmer | 0 | **0** | **0** |
-| 7 | Same signs as the cloud lane | Reported | n/a | 16 of 24 |
-| 7 | Same candidate diseases as the cloud lane | 0.80 | n/a | **0.88** (21 of 24) |
+| 7 | Same signs as the cloud lane | Reported | n/a | 18 of 24 |
+| 7 | Same candidate diseases as the cloud lane | 0.80 | n/a | **0.96** (23 of 24) |
 | 8 | Outbreak runs with report and ring calls done | 0.95 | **1.0** (3 of 3) | **1.0** (3 of 3) |
-| 9 | Third call to vet's first request, median | Reported | 20.7 s | 23.1 s |
-| 9 | Whole 3-call story with instant vet replies | Reported | 163 s | 101 s |
-| 10 | Model cost per case, excluding voice | Reported | **about $0.0028** (about 5,512 tokens in, 309 out) | No per-token cost |
+| 9 | Third call to vet's first request, median | Reported | 21.1 s | 22.9 s |
+| 9 | Whole 3-call story with instant vet replies | Reported | 169 s | 103 s |
+| 10 | Model cost per case, excluding voice | Reported | **about $0.0028** (about 5,547 tokens in, 340 out) | No per-token cost |
 
 Voice cost isn't included, because Nova Sonic use wasn't metered per case. The cost uses list prices from the AWS Price List API: Nova 2 Lite at $0.0003 per 1,000 input tokens and $0.0025 per 1,000 output tokens, Llama 3.3 at $0.00072 per 1,000 tokens.
 
@@ -42,7 +41,7 @@ In each attack the real model got the attack prompt and the full tool set. Where
 
 ## Also checked by hand
 
-- The Hindi voice line with a synthetic Polly caller: through the agent directly, the browser route, and the Twilio bridge with 8 kHz mu-law audio. Real callers, accents and poor lines haven't been tested.
-- AgentCore Runtime: a Hindi statement through to signed actions and a verified ledger, in one session.
+- The English voice line: through the agent directly, the browser route, and the Twilio bridge with 8 kHz mu-law audio. Real farmers and poor lines haven't been tested.
+- AgentCore Runtime: a farmer's statement through to signed actions and a verified ledger, in one session.
 - AgentCore Gateway: Cedar allowed a normal dose request and refused a 5,000 kg one, before the tool ran.
 - S3 Object Lock: entries uploaded with a retention date, and deferred second opinions run on return.

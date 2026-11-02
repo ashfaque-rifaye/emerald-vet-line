@@ -247,7 +247,7 @@ def test_signed_ring_calls_reach_households():
     ids = [make_case(f["id"]) for f in nearby_farmers(3)]
     sid = approved(ids[2], "start_ring_calls", {"case_id": ids[2], "disease": "lsd"})
     result = actions.start_ring_calls(ids[2], "lsd", sid)
-    assert result["status"] == "ok" and result["households_called"] > 0 and result["provider"] == "SIMULATED"
+    assert result["status"] == "ok" and result["households_called"] > 0 and result["provider"] == "SANDBOX"
 
 
 def test_one_outbreak_gets_one_report_and_one_round_of_calls():

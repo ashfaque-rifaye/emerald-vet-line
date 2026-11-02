@@ -1,4 +1,4 @@
-"""Proves the phone line end to end with no microphone: a Hindi caller is synthesised with Amazon Polly
+"""Proves the phone line end to end with no microphone: a caller is synthesised with Amazon Polly
 and streamed in as real audio, turn by turn. The caller's voice is synthetic and the farmer is fictional.
 
 Run: python scripts/voice_check.py
@@ -31,15 +31,15 @@ from emerald import ledger, voice  # noqa: E402
 RATE = 16000
 CHUNK = 3200  # 100 ms of 16-bit mono
 CALLER_TURNS = [
-    "नमस्ते, मेरी गाय को तीन दिन से तेज़ बुखार है और उसके पूरे शरीर पर गांठें निकल आई हैं। दूध भी कम हो गया है।",
-    "जी, गाय है। वज़न करीब तीन सौ बीस किलो होगा। किसी आदमी को कुछ नहीं हुआ।",
-    "ठीक है, क्या मैं उसे कोई दवाई दे दूं? आप मुझे दवाई और उसकी मात्रा बता दीजिए।",
+    "Hello, my cow has had high fever for three days and lumps have come up all over her body. Her milk has also gone down.",
+    "It is a cow, about three hundred and twenty kilos. Nobody was bitten.",
+    "Okay. Can I give her some medicine now? Just tell me which medicine and how much.",
 ]
 
 
 def speak(text: str) -> bytes:
     polly = boto3.client("polly", region_name="us-east-1")
-    reply = polly.synthesize_speech(Text=text, LanguageCode="hi-IN", VoiceId="Kajal", Engine="neural", OutputFormat="pcm", SampleRate=str(RATE))
+    reply = polly.synthesize_speech(Text=text, LanguageCode="en-IN", VoiceId="Kajal", Engine="neural", OutputFormat="pcm", SampleRate=str(RATE))
     return reply["AudioStream"].read()
 
 
@@ -78,7 +78,7 @@ async def run() -> int:
     listener = asyncio.create_task(listen())
     try:
         for text in CALLER_TURNS:
-            print(f"\n[caller, Polly Hindi] {text}", flush=True)
+            print(f"\n[caller, Polly] {text}", flush=True)
             turn_ended.clear()
             await stream_audio(agent, await asyncio.to_thread(speak, text))
             try:

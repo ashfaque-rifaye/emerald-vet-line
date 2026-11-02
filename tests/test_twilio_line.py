@@ -33,11 +33,11 @@ def test_media_message_shape():
     assert message["event"] == "media" and message["streamSid"] == "MZ1" and message["media"]["payload"]
 
 
-def test_outbound_stays_simulated_unless_configured(monkeypatch):
+def test_outbound_stays_in_the_sandbox_unless_configured(monkeypatch):
     monkeypatch.setenv("EMERALD_TELEPHONY", "TWILIO")
     monkeypatch.delenv("EMERALD_DEMO_PHONE", raising=False)
     case_id = surveillance.record_case("F001", ["skin_nodules"])["case_id"]
-    assert actions.call_vet(case_id, "summary")["provider"] == "SIMULATED"
+    assert actions.call_vet(case_id, "summary")["provider"] == "SANDBOX"
 
 
 def test_real_calls_go_only_to_the_demo_phone(monkeypatch):

@@ -1,7 +1,7 @@
 """The demo story from the terminal: three nearby calls, one vet, one outbreak response.
 
 Run: python scripts/run_story.py [--offline] [--no-second-opinion]
-Uses a fresh data folder per run. All people are synthetic; calls and payments are labelled simulations.
+Uses a fresh data folder per run. All people are synthetic; calls and payments run in the sandbox.
 """
 
 from __future__ import annotations

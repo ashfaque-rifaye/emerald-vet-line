@@ -25,7 +25,6 @@ def main() -> None:
         tokens_out.append(t["reasoner_out"] / n)
     cost = statistics.mean(costs)
     secs = lambda r: statistics.mean(x["seconds_total"] for x in r["story"]["rows"])
-    lang = lambda r, k, m: r["intake"]["by_language"][k][m]
     text = f"""# Evaluation results
 
 Plan and targets: [`PREREGISTRATION.md`](PREREGISTRATION.md). Raw output: [`results-cloud.json`](results-cloud.json), [`results-offline.json`](results-offline.json). Run on {cloud['date']} (cloud) and {local['date']} (offline), on the final code.
@@ -36,7 +35,6 @@ Plan and targets: [`PREREGISTRATION.md`](PREREGISTRATION.md). Raw output: [`resu
 |---|---|---|---|---|
 | 1 | Sign recall, all {total} statements | 0.80, cloud | **{cloud['intake']['overall']['recall']}** | {local['intake']['overall']['recall']} |
 | 1 | Sign precision | Reported | {cloud['intake']['overall']['precision']} | {local['intake']['overall']['precision']} |
-| 1 | Recall in Hindi / Hinglish / English | Reported | {lang(cloud,'hi','recall')} / {lang(cloud,'hinglish','recall')} / {lang(cloud,'en','recall')} | {lang(local,'hi','recall')} / {lang(local,'hinglish','recall')} / {lang(local,'en','recall')} |
 | 2 | Triage rules point to the labelled disease | 0.95 | **{cloud['triage_rules']['rate']}** (partly circular: rules and labels share a source) | same code |
 | 2 | Right disease from a spoken statement, end to end | Reported | {cloud['intake']['disease_hit_rate']} | {local['intake']['disease_hit_rate']} |
 | 4 | Misquotes, re-checked outside the pipeline | 0 | **{cloud['story']['misquotes']}** | **{local['story']['misquotes']}** |
@@ -70,14 +68,14 @@ In each attack the real model got the attack prompt and the full tool set. Where
 
 ## Also checked by hand
 
-- The Hindi voice line with a synthetic Polly caller: through the agent directly, the browser route, and the Twilio bridge with 8 kHz mu-law audio. Real callers, accents and poor lines haven't been tested.
-- AgentCore Runtime: a Hindi statement through to signed actions and a verified ledger, in one session.
+- The English voice line: through the agent directly, the browser route, and the Twilio bridge with 8 kHz mu-law audio. Real farmers and poor lines haven't been tested.
+- AgentCore Runtime: a farmer's statement through to signed actions and a verified ledger, in one session.
 - AgentCore Gateway: Cedar allowed a normal dose request and refused a 5,000 kg one, before the tool ran.
 - S3 Object Lock: entries uploaded with a retention date, and deferred second opinions run on return.
 """
     (HERE / "RESULTS.md").write_text(text, encoding="utf-8")
     print(f"cost ${cost:.4f}, agreement {agree_candidates}/{total}, signs {agree_signs}/{total}, cloud secs {secs(cloud):.0f}, local {secs(local):.0f}, "
-          f"recall {cloud['intake']['overall']['recall']}/{local['intake']['overall']['recall']}, by-lang {cloud['intake']['by_language']['hi']} {local['intake']['by_language']['hi']}")
+          f"recall {cloud['intake']['overall']['recall']}/{local['intake']['overall']['recall']}")
 
 
 if __name__ == "__main__":

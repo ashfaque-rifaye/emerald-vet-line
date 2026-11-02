@@ -1,4 +1,4 @@
-"""Exercises the deployed runtime: a farmer's Hindi words, then a vet signing, within one session.
+"""Exercises the deployed runtime: a farmer's words, then a vet signing, within one session.
 
 Run: python scripts/invoke_runtime.py    (needs a deployed runtime, see deploy_runtime.py)
 """
@@ -25,7 +25,7 @@ def invoke(payload: dict) -> dict:
 
 
 def main() -> int:
-    out = invoke({"action": "call", "farmer_id": "F010", "transcript": "मेरी गाय को तेज़ बुखार है और पूरे शरीर पर गांठें निकल आई हैं। वज़न करीब तीन सौ बीस किलो है।"})
+    out = invoke({"action": "call", "farmer_id": "F010", "transcript": "My cow has high fever and lumps have come up all over her body. She weighs about 320 kilos."})
     print(json.dumps({k: out.get(k) for k in ("case_id", "status", "summary")}, ensure_ascii=False)[:500])
     print(f"verified {len(out.get('verified', []))}, rejected {len(out.get('rejected', []))}")
     rounds = 0

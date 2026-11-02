@@ -8,7 +8,7 @@ Emerald has not been used with real farmers. These tests measure whether the sof
 
 ## Test sets
 
-- [`cases.json`](cases.json): farmer statements in Hindi, Hinglish and English, labelled with the signs they describe and the disease a rule-based reading of the guidelines points to, plus cases that should match nothing.
+- [`cases.json`](cases.json): farmer statements in everyday English, labelled with the signs they describe and the disease a rule-based reading of the guidelines points to, plus cases that should match nothing.
 - [`attacks.json`](attacks.json): attempts to get an irreversible action done with no vet signature.
 
 ## Metrics and targets
@@ -29,13 +29,14 @@ Emerald has not been used with real farmers. These tests measure whether the sof
 ## Not measured
 
 - Time saved against today's reporting process. We have no real baseline, and won't invent one.
-- Whether Hindi voice recognition works with real rural callers, accents, or poor phone lines. The voice check uses a synthetic caller.
+- Whether voice recognition works with real rural callers or poor phone lines.
 
 ## Changes after the first runs
 
-Targets and test sets have not changed. These code changes came from what the runs found, so every metric was re-run afterwards:
+Targets have not changed, and the test set changed once, as logged below. These code changes came from what the runs found, so every metric was re-run afterwards:
 
 - Oct 30: a signature paid a vet twice in the offline lane. Signatures became single-use.
 - Oct 30: the checker now sees which section a quote comes from, and that "may" is supported when the signs match.
 - Oct 31: the offline lane told a farmer "treat them with meloxicam". This missed metric 6 (target zero). `tell_farmer` now refuses any message naming a medicine or an amount, and code guarantees safe words as a fallback.
 - Oct 31: a fast vet could sign before the agent had saved its pause, which stalled the case. Runs on a case now take a per-case lock. Found while recording the demo.
+- Nov 1: the product moved from Hindi to English. The 16 Hindi and Hinglish statements in `cases.json` were rewritten in everyday English with the same labels, the sign-by-language row was dropped, and every metric was re-run. Results before this date measured the Hindi version.

@@ -9,14 +9,14 @@ from strands import Agent
 
 from . import models, triage
 
-PROMPT = f"""You take notes for a veterinary phone line. The farmer may speak Hindi, Hinglish or English.
+PROMPT = f"""You take notes for a veterinary phone line. The farmer speaks everyday Indian English.
 Pick signs ONLY from this list, and only ones the farmer actually described:
 {", ".join(sorted(triage.SIGNS))}
 
-Examples of how farmers say things: "gaanth" or "daane" on the skin means skin_nodules; "bukhar" means fever;
-"doodh kam" means reduced_milk; "munh mein chhale" means mouth_blisters; "laar" means drooling;
-"achanak mar gayi" means sudden_death; "khoon" from the nose or mouth means bleeding_from_body_openings;
-"thann mein sujan" means swollen_udder; "kutte ne kaata" means bitten_by_animal.
+Examples of how farmers say things: "lumps" or "boils" on the skin means skin_nodules; "body is hot" means fever;
+"giving less milk" means reduced_milk; "sores in the mouth" means mouth_blisters; "saliva dripping" means drooling;
+"dropped dead" means sudden_death; "blood" from the nose or mouth means bleeding_from_body_openings;
+"udder is swollen" means swollen_udder; "a dog bit her" means bitten_by_animal.
 
 Reply with only JSON: {{"signs": ["..."], "species": "cattle or buffalo", "weight_kg": number or null, "people_exposed": true or false}}
 Use a weight only if the farmer states one. Never guess a weight."""

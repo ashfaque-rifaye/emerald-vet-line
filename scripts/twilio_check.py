@@ -1,5 +1,5 @@
 """Tests the phone bridge without a Twilio account: this script behaves as Twilio does, sending a synthetic
-Hindi caller as 8 kHz mu-law Media Stream messages to the running console.
+caller as 8 kHz mu-law Media Stream messages to the running console.
 
 Run with the console running: python scripts/twilio_check.py [farmer_id]
 """
@@ -22,14 +22,14 @@ from emerald import twilio_line  # noqa: E402
 RATE = 8000
 FRAME = 160  # 20 ms of mu-law, the size Twilio sends
 TURNS = [
-    "नमस्ते, मेरी गाय को तीन दिन से तेज़ बुखार है और उसके पूरे शरीर पर गांठें निकल आई हैं। दूध भी कम हो गया है।",
-    "जी, गाय है। वज़न करीब तीन सौ बीस किलो होगा। किसी आदमी को कुछ नहीं हुआ।",
+    "Hello, my cow has had high fever for three days and lumps have come up all over her body. Her milk has also gone down.",
+    "It is a cow, about three hundred and twenty kilos. Nobody was bitten.",
 ]
 
 
 def speak(text: str) -> bytes:
     polly = boto3.client("polly", region_name="us-east-1")
-    reply = polly.synthesize_speech(Text=text, LanguageCode="hi-IN", VoiceId="Kajal", Engine="neural", OutputFormat="pcm", SampleRate=str(RATE))
+    reply = polly.synthesize_speech(Text=text, LanguageCode="en-IN", VoiceId="Kajal", Engine="neural", OutputFormat="pcm", SampleRate=str(RATE))
     return twilio_line.pcm16_to_mulaw(reply["AudioStream"].read())
 
 

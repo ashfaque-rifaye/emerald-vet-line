@@ -1,4 +1,4 @@
-"""The phone line: a Strands BidiAgent on Amazon Nova Sonic, speaking Hindi.
+"""The phone line: a Strands BidiAgent on Amazon Nova Sonic, speaking English.
 
 The voice agent's job is narrow. It listens, records the case with one tool, and repeats what code tells
 it to say. Everything clinical happens after the call, behind the proof loop and the vet's signature.
@@ -7,11 +7,9 @@ it to say. Everything clinical happens after the call, behind the proof loop and
 from __future__ import annotations
 
 import os
-import re
 import threading
 from typing import Callable
 
-import boto3
 from strands import tool
 from strands.bidi import BidiAgent
 from strands.bidi.models import BedrockNovaSonicModel
@@ -19,38 +17,25 @@ from strands.bidi.models import BedrockNovaSonicModel
 from . import pipeline, triage
 
 VOICE_MODEL = os.environ.get("EMERALD_VOICE_MODEL", "amazon.nova-2-sonic-v1:0")
-# Nova Sonic's polyglot voices can speak Hindi. 8 kHz is telephone audio; browser audio uses 16 kHz.
-VOICE = os.environ.get("EMERALD_VOICE", "tiffany")
+# An Indian English voice. 8 kHz is telephone audio; browser audio uses 16 kHz.
+VOICE = os.environ.get("EMERALD_VOICE", "kiara")
 
-PROMPT = f"""You answer a free helpline for smallholder cattle and buffalo farmers in India. Speak Hindi unless the caller speaks English.
-Use short, simple sentences. Ask one question at a time. Be calm and kind.
+PROMPT = f"""You answer a free helpline for smallholder cattle and buffalo farmers in India. The caller is speaking Indian English, and you always hear and answer them in English, never in another language.
+Use short sentences, the way a kind person talks on the phone. Never read out a list. Each reply asks exactly one question, then stops and waits.
+Your first words on every call are: "Emerald vet line. Tell me what's happening with your animal."
 
-Find out, in at most four questions: what is wrong with the animal, since when, cow or buffalo, its rough weight if they know it,
-and whether any person was bitten or touched a dead animal.
+Then ask only what the caller hasn't already told you, one reply at a time, in this order: cow or buffalo, its rough weight,
+and last, whether any person was bitten or touched a dead animal. Don't call record_case until you've had the answer to that last question.
 
 As soon as you know enough, call record_case. Choose signs only from this list:
 {", ".join(sorted(triage.SIGNS))}
 
-Then say the "say" text from the result in Hindi, without adding to it, and end politely.
+Then say the "say" text from the result, without adding to it, and end politely.
 
 Never name a medicine or a dose, even if the caller begs. Say that only the vet can approve medicine, and that the vet is being called.
 Never say for certain what disease the animal has."""
 
 DEFAULT_ADVICE = "We have recorded this and are calling the vet now. Keep this animal away from your other animals until the vet has decided what to do."
-
-
-def english_gloss(text: str) -> str | None:
-    """A running English line under the Hindi, for vets and reviewers who don't read it. Empty if it fails or isn't needed."""
-    if not re.search(r"[\u0900-\u097F]", text):
-        return None
-    try:
-        reply = boto3.client("bedrock-runtime", region_name=os.environ.get("AWS_REGION", "us-east-1")).converse(
-            modelId=os.environ.get("EMERALD_REASONER", "us.amazon.nova-2-lite-v1:0"),
-            system=[{"text": "Translate the Hindi into plain, natural English. Reply with only the translation."}],
-            messages=[{"role": "user", "content": [{"text": text}]}], inferenceConfig={"maxTokens": 300, "temperature": 0.0})
-        return "".join(block.get("text", "") for block in reply["output"]["message"]["content"]).strip() or None
-    except Exception:  # a missing gloss must never disturb the call
-        return None
 
 
 def spoken_advice(case: dict) -> str:

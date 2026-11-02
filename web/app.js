@@ -56,7 +56,7 @@ function headline(s, st) {
   const flagged = focus && focus.red_flags.length;
   const off = s.lane === "offline";
   switch (st) {
-    case "call": return { a: `A farmer ${capsule()}`, b: "is on the line.", p: "No app, no reading. Just a phone call in Hindi." };
+    case "call": return { a: `A farmer ${capsule()}`, b: "is on the line.", p: "No app, no reading. Just a phone call." };
     case "proof":
       if (flagged) return { a: `Red flag. ${capsule(true)}`, b: "Safety comes first.", p: "The farmer already has the safety steps and a doctor is being called. Now the evidence is checked." };
       return { a: `Checking ${capsule()}`, b: "every claim.", p: off ? "On this laptop, the same rules apply: a claim with no source sentence doesn't get through." : "Each claim must point to a sentence in an official source. A second model looks for overreach." };
@@ -118,19 +118,18 @@ function shortCite(text) {
 }
 
 function actionItems(s) {
-  const sim = p => (p === "SIMULATED" ? '<span class="sim">SIMULATED</span>' : "");
   const items = [];
   const ring = s.calls.filter(c => c.purpose === "ring_alert");
-  if (ring.length) items.push(`<div class="act"><span class="ico lime">${ICON.ring}</span><div><b>${ring.length} homes warned</b>${sim(ring[0].provider)}<small>${esc(ring[0].script)}</small></div></div>`);
+  if (ring.length) items.push(`<div class="act"><span class="ico lime">${ICON.ring}</span><div><b>${ring.length} homes warned</b><small>${esc(ring[0].script)}</small></div></div>`);
   s.reports.forEach(r => items.push(`<div class="act"><span class="ico hot">${ICON.doc}</span><div><b>Outbreak report filed</b><small>${esc(r.body)}</small></div></div>`));
   s.prescriptions.forEach(r => {
     const d = JSON.parse(r.detail);
     items.push(`<div class="act"><span class="ico">${ICON.rx}</span><div><b>${esc(d.drug)} ${esc(d.total_dose)} ${esc(d.route)}</b><small>Dose from code at ${d.weight_kg} kg, for the vet to give. Source: “${esc(d.source_quote)}”</small></div></div>`);
   });
-  s.payments.forEach(p => items.push(`<div class="act"><span class="ico">${ICON.money}</span><div><b>₹${Math.round(p.amount)} paid to ${esc(vetName(p.to_vet))}</b>${sim(p.provider)}<small>From the village fund, on the vet's signature.</small></div></div>`));
-  s.calls.filter(c => c.to_role === "doctor").forEach(c => items.push(`<div class="act"><span class="ico hot">${ICON.person}</span><div><b>Doctor called</b>${sim(c.provider)}<small>${esc(c.script)}</small></div></div>`));
-  s.calls.filter(c => c.to_role === "farmer").forEach(c => items.push(`<div class="act"><span class="ico">${ICON.phone}</span><div><b>Farmer told what to do</b>${sim(c.provider)}<small>${esc(c.script)}</small></div></div>`));
-  s.calls.filter(c => c.to_role === "vet").forEach(c => items.push(`<div class="act"><span class="ico">${ICON.phone}</span><div><b>${esc(vetName(c.to_person))} called</b>${sim(c.provider)}<small>${esc(c.script || "Evidence pack read out.")}</small></div></div>`));
+  s.payments.forEach(p => items.push(`<div class="act"><span class="ico">${ICON.money}</span><div><b>₹${Math.round(p.amount)} paid to ${esc(vetName(p.to_vet))}</b><small>From the village fund, on the vet's signature.</small></div></div>`));
+  s.calls.filter(c => c.to_role === "doctor").forEach(c => items.push(`<div class="act"><span class="ico hot">${ICON.person}</span><div><b>Doctor called</b><small>${esc(c.script)}</small></div></div>`));
+  s.calls.filter(c => c.to_role === "farmer").forEach(c => items.push(`<div class="act"><span class="ico">${ICON.phone}</span><div><b>Farmer told what to do</b><small>${esc(c.script)}</small></div></div>`));
+  s.calls.filter(c => c.to_role === "vet").forEach(c => items.push(`<div class="act"><span class="ico">${ICON.phone}</span><div><b>${esc(vetName(c.to_person))} called</b><small>${esc(c.script || "Evidence pack read out.")}</small></div></div>`));
   return items;
 }
 
@@ -149,7 +148,7 @@ function renderLedger(s) {
     ${s.can_sync && !s.tampered ? `<button class="pill" id="syncBtn"${s.lane === "offline" || !s.unsynced ? " disabled" : ""}>Seal ${s.unsynced} in S3</button>` : ""}
   </div>${syncNote ? `<p class="hint" style="margin:0 0 8px">${esc(syncNote)}</p>` : ""}`;
   const rows = s.ledger.filter(e => e.type !== "model_usage").map(e => `<div class="block${broken && e.seq === broken ? " broken" : ""}"><span class="n">#${e.seq}</span><span class="t">${esc(LOG_NAMES[e.type] || e.type)}</span><span class="h">${esc(e.hash.slice(0, 8))}</span></div>`).join("");
-  return head + tools + (rows || '<div class="empty">Empty so far.</div>');
+  return `<div class="ledger-head">${head}${tools}</div>` + (rows || '<div class="empty">Empty so far.</div>');
 }
 
 function renderPane(s) {
@@ -247,6 +246,7 @@ function countUp(id, value, prefix = "") {
 function render(s) {
   const prevStage = S ? stageOf(S) : null;
   S = s;
+  if (!s.cases.length) activeTab = "proof"; // a cleared console opens on what no model can do
   const off = s.lane === "offline";
   document.body.classList.toggle("offline", off);
   $("nightBanner").hidden = !off;
@@ -286,11 +286,10 @@ async function tick() {
 
 /* Voice: 16 kHz mono PCM both ways. */
 let socket, audioCtx, micStream, micNode, playAt = 0, liveSources = [];
-function say(role, text, line) {
+function say(role, text) {
   const box = $("lines"), div = document.createElement("div");
   div.className = "say " + role;
   div.textContent = text;
-  if (line) div.dataset.line = line;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
@@ -318,10 +317,9 @@ async function startCall() {
   socket.onmessage = ev => {
     const m = JSON.parse(ev.data);
     if (m.type === "audio") playPcm(m.audio);
-    else if (m.type === "transcript") say(m.role === "user" ? "user" : "assistant", m.text, m.line);
-    else if (m.type === "gloss") {
-      const line = document.querySelector(`.say[data-line="${m.line}"]`);
-      if (line) { const small = document.createElement("small"); small.textContent = m.text; line.appendChild(small); $("lines").scrollTop = $("lines").scrollHeight; }
+    else if (m.type === "transcript") {
+      // Nova Sonic can spell a short Indian-English line in Devanagari, though it understood it: this log stays English.
+      if (m.role !== "user" || !/[ऀ-ॿ]/.test(m.text)) say(m.role === "user" ? "user" : "assistant", m.text);
     }
     else if (m.type === "tool") say("tool", "Agent used: " + m.names.join(", "));
     else if (m.type === "barge_in") { liveSources.forEach(s => s.stop()); liveSources = []; playAt = 0; }
