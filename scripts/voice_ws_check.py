@@ -1,12 +1,14 @@
 """Tests the console's browser call route: a synthetic caller over the same WebSocket the page uses.
 
 Run with the console running: python scripts/voice_ws_check.py [farmer_id]
+For the hosted console, set EMERALD_CONSOLE to its address, such as wss://emerald-....run.app
 """
 
 from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 
 import boto3
@@ -28,7 +30,7 @@ def speak(text: str) -> bytes:
 
 async def main(farmer: str) -> int:
     seen = {"audio_chunks": 0, "transcripts": 0, "tools": []}
-    async with websockets.connect(f"ws://127.0.0.1:8765/ws/call/{farmer}", max_size=None) as ws:
+    async with websockets.connect(f"{os.environ.get('EMERALD_CONSOLE', 'ws://127.0.0.1:8765')}/ws/call/{farmer}", max_size=None) as ws:
         async def listen() -> None:
             async for raw in ws:
                 message = json.loads(raw)

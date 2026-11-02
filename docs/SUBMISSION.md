@@ -35,6 +35,8 @@ Emerald is a voice agent for smallholder livestock farmers, built with the Stran
 
 **Repo:** https://github.com/ashfaque-rifaye/emerald-vet-line
 
+**Live demo:** https://emerald-upm6wwty7q-uk.a.run.app
+
 **Video title:** Emerald: a vet line that acts, proves its work, and asks a vet first
 
 **Video description:**

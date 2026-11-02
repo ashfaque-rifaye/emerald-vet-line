@@ -2,7 +2,7 @@
 
 *Built with the Strands Agents SDK for the Strands SDK: Workshop to Ship hackathon. Focus area: Health.*
 
-**Links:** [Source code](https://github.com/ashfaque-rifaye/emerald-vet-line) · Demo video: VIDEO_LINK · [Evaluation results](https://github.com/ashfaque-rifaye/emerald-vet-line/blob/main/eval/RESULTS.md)
+**Links:** [Try it live](https://emerald-upm6wwty7q-uk.a.run.app) · [Source code](https://github.com/ashfaque-rifaye/emerald-vet-line) · Demo video: VIDEO_LINK · [Evaluation results](https://github.com/ashfaque-rifaye/emerald-vet-line/blob/main/eval/RESULTS.md)
 
 For a smallholder family, a sick cow is a health problem and a money problem at once. Some of these diseases can infect people. Antibiotics used without a vet feed resistance. And help is thin: a report to India's Parliament in December 2022 [put public-sector field vets at 28,328, against 36,623 approved posts](https://www.vethelplineindia.co.in/ensuring-optimum-veterinary-workforce-in-india/). Lumpy skin disease alone [killed more than 21,000 cattle in one state by late 2022](https://udayavani.com/?p=1400004), and that's a reported figure from a single outbreak.
 
@@ -121,6 +121,8 @@ So I can't tell you it saves animals yet. What I can measure today is whether th
 **Code should decide the steps, and models should do the words.** Which actions apply to a case is now decided in code, and an agent only holds the tools its steps need. If it stops short of a required step, code sends it back. It's less magical, but I'd rather have it in front of a farmer.
 
 ## Try it
+
+**[Open the live console](https://emerald-upm6wwty7q-uk.a.run.app).** Press "Play three nearby calls", sign as the vet when a card appears, then open the Ledger tab and try to change a past record. Or press the call button, allow the microphone, and describe a sick cow. Everyone shares one demo, which clears itself after 20 quiet minutes, and usage is capped. The no-signal mode needs a laptop's local model, so it's only in the video.
 
 The tests need no AWS account or GPU. They include the forged approvals, changed amounts and tampered records:
 

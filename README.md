@@ -4,7 +4,7 @@
 
 Built with the [Strands Agents SDK](https://strandsagents.com) for the AWS Builder Center hackathon *Strands SDK: Workshop to Ship* (focus area: Health, through One Health).
 
-**Demo video:** added on upload · **Article:** added on publish · **[Evaluation results](eval/RESULTS.md)**
+**[Try it live](https://emerald-upm6wwty7q-uk.a.run.app)** · **Demo video:** added on upload · **Article:** added on publish · **[Evaluation results](eval/RESULTS.md)**
 
 ![Emerald's console](docs/images/vet.png)
 
@@ -58,6 +58,8 @@ On synthetic cases, in both the cloud and offline lanes: 0 of 15 attacks complet
 | Amazon Nova 2 Lite and Llama 3.3 on Bedrock | Reasoning, and the independent second opinion |
 | Amazon S3 Object Lock | Field kits seal their signed record here when they get signal back ([`sync.py`](emerald/sync.py)) |
 | AWS Lambda | Runs the gateway's tools ([`tool_lambda.py`](emerald/tool_lambda.py)) |
+
+The [live console](https://emerald-upm6wwty7q-uk.a.run.app) runs on Google Cloud Run, which scales to zero, and calls all of the above. It holds no AWS key: an AWS role trusts the service's own Google identity and reaches only Emerald's models, ledger bucket and gateway ([`cloud_identity.py`](emerald/cloud_identity.py), [`deploy_cloudrun.py`](scripts/deploy_cloudrun.py)). It runs in public mode, with usage caps and without the laptop-only offline lane ([`public.py`](emerald/public.py)).
 
 ## Sources
 
