@@ -11,7 +11,8 @@ import time
 from collections import defaultdict, deque
 
 # kind: (per visitor, per this many seconds, for everyone per day)
-LIMITS = {"case": (15, 3600, 300), "voice": (6, 3600, 120), "sync": (6, 3600, 60)}
+# Worst case a day is about $1 of Bedrock for cases and $3 for voice.
+LIMITS = {"case": (15, 3600, 300), "voice": (4, 3600, 40), "sync": (6, 3600, 60)}
 VOICE_SECONDS = 240
 VOICE_AT_ONCE = 3
 QUIET_RESET_SECONDS = 20 * 60
