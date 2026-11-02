@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from strands.bidi.types.events import BidiAudioDeltaEvent, BidiBargeInEvent, BidiToolUseBlocksEvent, BidiTranscriptBlockEvent
 
-from . import config, db, ledger, pipeline, public, registry, signoff, surveillance, sync, triage, twilio_line, voice
+from . import cloud_identity, config, db, ledger, pipeline, public, registry, signoff, surveillance, sync, triage, twilio_line, voice
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 app = FastAPI(title="Emerald")
@@ -332,6 +332,7 @@ async def twilio_stream(ws: WebSocket) -> None:
 def main() -> None:
     import uvicorn
 
+    cloud_identity.start()
     registry.world()
     uvicorn.run(app, host=os.environ.get("EMERALD_HOST", "127.0.0.1"), port=int(os.environ.get("EMERALD_PORT", "8765")), log_level="warning")
 

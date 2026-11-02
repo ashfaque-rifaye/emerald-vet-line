@@ -1,9 +1,11 @@
 """The hosted demo's limits: a public link must not be able to run up a bill or reach the laptop-only lane."""
 
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 
-from emerald import public, server
+from emerald import cloud_identity, public, server
 
 
 @pytest.fixture(autouse=True)
@@ -45,3 +47,18 @@ def test_the_hosted_demo_refuses_the_offline_lane_and_the_phone_line():
     assert refused.status_code == 403 and "laptop" in refused.json()["reason"]
     assert client.post("/twilio/voice").status_code == 404
     assert client.get("/api/state").json()["lane"] == "cloud"
+
+
+def test_aws_access_from_cloud_run_needs_no_stored_key(monkeypatch):
+    for name in ("EMERALD_AWS_ROLE_ARN", "AWS_ROLE_ARN", "AWS_WEB_IDENTITY_TOKEN_FILE", "AWS_ROLE_SESSION_NAME"):
+        monkeypatch.setenv(name, "")  # so each is put back as it was afterwards
+        monkeypatch.delenv(name)
+    cloud_identity.start()
+    assert "AWS_ROLE_ARN" not in os.environ  # off on a laptop
+
+    monkeypatch.setenv("EMERALD_AWS_ROLE_ARN", "arn:aws:iam::123456789012:role/emerald-cloudrun")
+    monkeypatch.setattr(cloud_identity, "_write_token", lambda: None)
+    monkeypatch.setattr(cloud_identity, "_keep_fresh", lambda: None)
+    cloud_identity.start()
+    assert os.environ["AWS_ROLE_ARN"].endswith("role/emerald-cloudrun")
+    assert os.environ["AWS_WEB_IDENTITY_TOKEN_FILE"] == cloud_identity.TOKEN_FILE
