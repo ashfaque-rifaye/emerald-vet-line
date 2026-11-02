@@ -221,13 +221,8 @@ def in_call(src: float) -> float:
 
 tool_at = next((t for t, names in ev["tools"] if "record_case" in names), ev["turns"][3]["at"])
 film_tool = in_call(tool_at)
-medicine = in_call(ev["turns"][4]["at"])
+# From here to the attacks the camera stays on the whole screen: a zoom hid what the rest of it was doing.
 keys = [beside_phone(0, 0.6)]
-map_view = rect("after_f4", "callout", [700, 240, 280, 120])
-keys.append(on(map_view, film_tool - call_base + 0.7, frac=0.42, at_x=0.39, at_y=0.46, cap=2.1, d=1.1))
-# The proof panel is still loading here, so the camera widens onto the live transcript and the new case instead.
-keys.append(view(medicine - call_base - 0.1, 685, 412, 1.4, 1.0))
-keys.append(beside_phone(call_len - 1.6, 1.0))
 call_shot = {"kind": "screen", "t0": round(call_base, 3), "t1": round(call_base + call_len, 3), "map": rows, "cam": [{**k, "t": round(call_base + k["t"], 3)} for k in keys], "cursor": False}
 film.shots.append(call_shot)
 film.clock = call_base + call_len
@@ -291,15 +286,12 @@ phone = {"t0": round(phone_t0, 3), "t1": round(hangup + 1.2, 3), "x": 1530, "y":
 proof_start = tool_at
 a6, b6 = film.say("n06", at=film.clock + 0.1)
 a7, b7 = film.say("n07", at=b6 + 0.2)
-side = rect("after_f6", "side")
-top = [side[0], side[1], side[2], side[3] * 0.5]
-bottom = [side[0], side[1] + side[3] * 0.32, side[2], side[3] * 0.5]
 length = b7 - film.clock + 0.4
 t_proof = film.clock
 film.sound["proof"] = t_proof
 film.sound["whoosh"].append(t_proof - 0.25)
-film.screen(length, [(proof_start, M["vet"] - 1.5)], [on(top, 0, frac=0.84, at_x=0.62, cap=2.4), on(bottom, length - 2.5, frac=0.84, at_x=0.62, cap=2.4, d=3.0)], cursor=False, fade=0.3)
-film.overlays.append({"type": "graph", "t0": round(t_proof + 0.3, 3), "t1": round(film.clock - 0.1, 3)})
+film.screen(length, [(proof_start, M["vet"] - 1.5)], [wide(0)], cursor=False, fade=0.3)
+film.overlays.append({"type": "graph", "x": 866, "y": 190, "w": 400, "t0": round(t_proof + 0.3, 3), "t1": round(film.clock - 0.1, 3)})
 film.tag("Strands Graph  ·  custom verifier node  ·  7 MCP servers", t_proof + 0.2, film.clock - 0.1)
 
 # ------------------------------------------------------------ the vet
@@ -311,9 +303,8 @@ talk = b9 - film.clock + 0.1
 t_vet = film.clock
 film.sound["stop"] = a8
 film.sound["hits"].append({"t": a8 + 0.45, "p": 0.8})
-vet_card = rect("vet", "vet")
 film.screen(talk + hold_lead + 1.25 + 1.1, [(M["vet"] - 0.5, sign - hold_lead), (sign - hold_lead, sign + 1.25 + 1.1)],
-            [on(vet_card, 0, frac=0.56, at_y=0.46, cap=1.9, d=0.4), on(vet_card, 1.4, frac=0.76, at_y=0.46, cap=2.8, d=1.4)])
+            [wide(0)])
 # The take's hold starts here, so the fill plays at real speed.
 real_rows = film.shots[-1]["map"]
 real_rows[0][2] = round(t_vet + talk, 3)
@@ -338,7 +329,7 @@ rows_term = [
     {"cmd": f'pay_vet_consult(case, "{args["vet_id"]}", amount_inr={args["amount_inr"]:g}, signoff="{sid}")   # again', "at": when("Use"), "result": when("Nothing"), "label": "NOT REPEATED", "reason": "already carried out, so nothing moved", "good": True},
 ]
 length = b10 - film.clock + 1.3
-film.screen(length, [(M["first_done"] - 0.6, M["first_done"])], [on(rect("first_done", "side"), 0, frac=0.92, cap=1.4, d=0.4)], cursor=False)
+film.screen(length, [(M["first_done"] - 0.6, M["first_done"])], [wide(0)], cursor=False)
 film.overlays.append({"type": "terminal", "t0": round(a10 - 0.05, 3), "t1": round(film.clock, 3), "rows": [{k: (round(v, 3) if isinstance(v, float) else v) for k, v in r.items()} for r in rows_term]})
 for r in rows_term:
     film.sound["errors" if not r["good"] else "ticks"].append(r["result"])

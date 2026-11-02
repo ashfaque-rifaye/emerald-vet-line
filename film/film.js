@@ -294,7 +294,7 @@ function drawGraph(o, t) {
   if (t < o.t0 || t > o.t1) return;
   const a = Math.min(easeOut(prog(t, o.t0, o.t0 + 0.3)), 1 - prog(t, o.t1 - 0.25, o.t1));
   const nodes = [["Evidence agent", "Nova 2 Lite cites sentence numbers"], ["Verifier", "Plain code fills in the words"], ["Second opinion", "Llama 3.3 hunts for overreach"]];
-  const x = 56, y = 150, w = 410, nh = 104, gap = 46;
+  const x = o.x ?? 56, y = o.y ?? 150, w = o.w ?? 410, nh = 104, gap = 46;
   g.save(); g.globalAlpha = a; g.letterSpacing = "0px";
   nodes.forEach(([title, sub], i) => {
     const ny = y + i * (nh + gap), on = (Math.floor((t - o.t0) / 1.4) % 3) === i;
