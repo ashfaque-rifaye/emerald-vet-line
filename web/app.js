@@ -324,6 +324,7 @@ async function startCall() {
     else if (m.type === "tool") say("tool", "Agent used: " + m.names.join(", "));
     else if (m.type === "barge_in") { liveSources.forEach(s => s.stop()); liveSources = []; playAt = 0; }
     else if (m.type === "no_signal") say("tool", "Voice needs signal. Log the case with the buttons below.");
+    else if (m.type === "notice") say("tool", m.text);
   };
   socket.onclose = () => stopCall();
   socket.onopen = () => {
@@ -380,7 +381,8 @@ async function playStory() {
   $("storyBtn").disabled = true;
   const taken = new Set((S?.cases || []).map(c => c.farmer_id));
   for (const f of nearbyFarmers(8).filter(f => !taken.has(f.id)).slice(0, 3)) {
-    await post("/api/calls", { farmer_id: f.id, signs: SCENARIOS.lsd.signs, weight_kg: SCENARIOS.lsd.weight });
+    const res = await post("/api/calls", { farmer_id: f.id, signs: SCENARIOS.lsd.signs, weight_kg: SCENARIOS.lsd.weight });
+    if (!res.ok) { say("tool", res.data.reason || "Could not log the call."); break; }
     await tick();
     await new Promise(r => setTimeout(r, 5000));
   }
@@ -392,7 +394,8 @@ function wire() {
   $("heroCall").onclick = () => (S?.lane === "offline" ? document.querySelector(".pill[data-s]").focus() : toggleCall());
   $("storyBtn").onclick = playStory;
   $("signal").onclick = async () => {
-    await post("/api/lane", { lane: S?.lane === "offline" ? "cloud" : "offline" });
+    const res = await post("/api/lane", { lane: S?.lane === "offline" ? "cloud" : "offline" });
+    if (!res.ok) say("tool", res.data.reason || "Could not change the signal.");
     syncNote = "";
     if (socket) stopCall();
     tick();
@@ -402,7 +405,8 @@ function wire() {
     if (!b) return;
     const sc = SCENARIOS[b.dataset.s], taken = new Set((S?.cases || []).map(c => c.farmer_id));
     const who = taken.has($("caller").value) ? world.farmers.find(f => !taken.has(f.id)).id : $("caller").value;
-    await post("/api/calls", { farmer_id: who, signs: sc.signs, weight_kg: sc.weight });
+    const res = await post("/api/calls", { farmer_id: who, signs: sc.signs, weight_kg: sc.weight });
+    if (!res.ok) say("tool", res.data.reason || "Could not log the call.");
     tick();
   };
   document.querySelector(".tabs").onclick = e => {

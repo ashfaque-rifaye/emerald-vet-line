@@ -10,6 +10,7 @@ import base64
 import json
 import os
 import threading
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -19,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from strands.bidi.types.events import BidiAudioDeltaEvent, BidiBargeInEvent, BidiToolUseBlocksEvent, BidiTranscriptBlockEvent
 
-from . import config, db, ledger, pipeline, registry, signoff, surveillance, sync, triage, twilio_line, voice
+from . import config, db, ledger, pipeline, public, registry, signoff, surveillance, sync, triage, twilio_line, voice
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 app = FastAPI(title="Emerald")
@@ -60,6 +61,8 @@ def world() -> dict:
 
 @app.get("/api/state")
 def state() -> dict:
+    if public.quiet_too_long() and all(job == "idle" for job in _jobs.values()):
+        reset()  # the hosted demo starts fresh for the next visitor
     cases = _rows("SELECT * FROM cases ORDER BY reported_at DESC, rowid DESC")
     for case in cases:
         for field in ("signs", "candidates", "red_flags"):
@@ -82,7 +85,7 @@ def state() -> dict:
         "reports": _rows("SELECT * FROM reports ORDER BY filed_at DESC"),
         "ledger": entries[-60:][::-1], "ledger_total": len(entries), "verification": ledger.verify(),
         "tampered": bool(_tampered), "unsynced": sum(e["synced"] == 0 for e in entries),
-        "can_sync": bool(os.environ.get("EMERALD_LEDGER_BUCKET")),
+        "can_sync": bool(os.environ.get("EMERALD_LEDGER_BUCKET")), "public": public.enabled(),
     }
 
 
@@ -111,8 +114,12 @@ class CallIn(BaseModel):
 
 
 @app.post("/api/calls")
-def typed_call(body: CallIn) -> dict:
+def typed_call(body: CallIn, request: Request):
     """A case entered by a field worker, for when there is no voice line."""
+    reason = public.allow("case", public.visitor(request.headers, request.client and request.client.host))
+    if reason:
+        return JSONResponse({"status": "refused", "reason": reason}, status_code=429)
+    public.touch()
     case = pipeline.open_case(body.farmer_id, body.signs, body.weight_kg)
     _jobs[case["case_id"]] = "proving"
     threading.Thread(target=_process, args=(case,), daemon=True).start()
@@ -128,6 +135,7 @@ class Decision(BaseModel):
 
 @app.post("/api/signoffs/{signoff_id}")
 def decide(signoff_id: str, body: Decision):
+    public.touch()
     result = signoff.decide(signoff_id, body.vet_id, body.pin, body.approve, body.note)
     if result["status"] == "refused":
         return JSONResponse(result, status_code=403)
@@ -146,13 +154,18 @@ def set_lane(body: Lane) -> dict:
     """Signal on or off. Agents read this per run, so the same graph and tools move to the local model."""
     if body.lane not in ("cloud", "offline"):
         return JSONResponse({"status": "refused", "reason": "unknown lane"}, status_code=400)
+    if public.enabled() and body.lane == "offline":
+        return JSONResponse({"status": "refused", "reason": public.OFFLINE_NOTE}, status_code=403)
     os.environ["EMERALD_LANE"] = body.lane
     return {"lane": body.lane}
 
 
 @app.post("/api/sync")
-def run_sync():
+def run_sync(request: Request):
     """Back in signal: upload the signed record, then run the second opinions that had to wait."""
+    reason = public.allow("sync", public.visitor(request.headers, request.client and request.client.host))
+    if reason:
+        return JSONResponse({"status": "refused", "reason": reason}, status_code=429)
     if not os.environ.get("EMERALD_LEDGER_BUCKET"):
         return JSONResponse({"status": "refused", "reason": "no ledger bucket is configured"}, status_code=400)
     if _tampered or not ledger.verify()["ok"]:
@@ -166,6 +179,7 @@ def run_sync():
 @app.post("/api/demo/tamper")
 def tamper() -> dict:
     """For showing the proof: quietly edits one past record, exactly as an attacker would."""
+    public.touch()
     with db.connect() as conn:
         # A payment makes the point best: someone quietly changes who got paid, or how much.
         row = conn.execute("SELECT seq, payload FROM ledger WHERE type IN ('vet_paid','treatment_prescribed','case_recorded') "
@@ -206,6 +220,12 @@ def reset() -> dict:
 async def phone_line(ws: WebSocket, farmer_id: str) -> None:
     """Browser microphone in, Nova Sonic out: 16 kHz, 16-bit mono PCM both ways."""
     await ws.accept()
+    reason = "Too many calls are live right now. Please try again in a minute." if public.enabled() and public.voice_calls >= public.VOICE_AT_ONCE else None
+    reason = reason or public.allow("voice", public.visitor(ws.headers, ws.client and ws.client.host))
+    if reason:
+        await ws.send_json({"type": "notice", "text": reason})
+        await ws.close()
+        return
     if config.lane() == "offline":
         # Nova Sonic needs a connection. With no signal, cases are entered by the field worker instead.
         await ws.send_json({"type": "no_signal"})
@@ -219,6 +239,8 @@ async def phone_line(ws: WebSocket, farmer_id: str) -> None:
         _jobs[case["case_id"]] = "idle"
 
     call = voice.PhoneCall(farmer_id, on_case=on_case, on_done=on_done)
+    public.touch()
+    ends = time.monotonic() + public.VOICE_SECONDS
     await call.agent.start()
 
     async def speak_out() -> None:
@@ -233,13 +255,20 @@ async def phone_line(ws: WebSocket, farmer_id: str) -> None:
                 await ws.send_json({"type": "tool", "names": [t["name"] for t in event.tool_uses]})
 
     speaker = asyncio.create_task(speak_out())
+    public.voice_calls += 1
     try:
         while True:
             pcm = await ws.receive_bytes()
+            if public.enabled() and time.monotonic() > ends:
+                await ws.send_json({"type": "notice", "text": "Demo calls end after four minutes."})
+                await ws.close()
+                break
             await call.agent.send({"audio_delta": {"format": "pcm", "source": {"bytes": pcm}}})
     except WebSocketDisconnect:
         pass
     finally:
+        public.voice_calls -= 1
+        public.touch()
         speaker.cancel()
         await call.agent.stop()
 
@@ -247,6 +276,8 @@ async def phone_line(ws: WebSocket, farmer_id: str) -> None:
 @app.post("/twilio/voice")
 async def twilio_voice(request: Request) -> Response:
     """Twilio asks what to do with an incoming call. The caller's number picks the farmer, or a demo farmer."""
+    if public.enabled():
+        return Response(status_code=404)  # the hosted demo has no phone number
     form = await request.form()
     caller = str(form.get("From", ""))
     farmer = next((f for f in registry.world()["farmers"] if f["phone"] == caller), None)
@@ -256,6 +287,9 @@ async def twilio_voice(request: Request) -> Response:
 @app.websocket("/twilio/stream")
 async def twilio_stream(ws: WebSocket) -> None:
     """A real phone call: 8 kHz mu-law from Twilio, 8 kHz PCM to and from Nova Sonic."""
+    if public.enabled():
+        await ws.close()
+        return
     await ws.accept()
     call, speaker, stream_sid = None, None, ""
 
@@ -299,7 +333,7 @@ def main() -> None:
     import uvicorn
 
     registry.world()
-    uvicorn.run(app, host="127.0.0.1", port=int(os.environ.get("EMERALD_PORT", "8765")), log_level="warning")
+    uvicorn.run(app, host=os.environ.get("EMERALD_HOST", "127.0.0.1"), port=int(os.environ.get("EMERALD_PORT", "8765")), log_level="warning")
 
 
 if __name__ == "__main__":
